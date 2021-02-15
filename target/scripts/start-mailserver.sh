@@ -108,6 +108,7 @@ function register_functions
   [[ ${ENABLE_POSTGREY} -eq 1 ]] && _register_setup_function "_setup_postgrey"
 
   _register_setup_function "_setup_dkim"
+  _register_setup_function "_setup_dmarc"
   _register_setup_function "_setup_ssl"
 
   [[ ${POSTFIX_INET_PROTOCOLS} != "all" ]] && _register_setup_function "_setup_inet_protocols"
@@ -1106,6 +1107,18 @@ function _setup_SRS
   postconf -e "sender_canonical_classes = ${SRS_SENDER_CLASSES}"
   postconf -e "recipient_canonical_maps = tcp:localhost:10002"
   postconf -e "recipient_canonical_classes = envelope_recipient,header_recipient"
+}
+
+function _setup_dmarc
+{
+  _notify 'task' 'Setting up DMARC'
+
+  mkdir -p /etc/opendmarc
+
+  if [[ -e "/tmp/docker-mailserver/opendmarc/ignore.hosts" ]]
+  then
+    cp /tmp/docker-mailserver/opendmarc/ignore.hosts /etc/opendmarc/
+  fi
 }
 
 function _setup_dkim
